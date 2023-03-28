@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-import base64, datetime, json, lrudict, re, socket, socketserver, string, sys, threading, traceback, urllib.request, urllib.error, urllib.parse
+import base64, datetime, json, lrudict, re, socket, socketserver, string, sys, threading, time, traceback, urllib.request, urllib.error, urllib.parse
+# import pidisplayhatmini
+from DisplayDateMiniHat import DisplayDateMiniHat
 from config_handler import *
 
 class ThreadingTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -33,7 +35,7 @@ class Handler(socketserver.BaseRequestHandler):
 
 		# readline is pretty convenient
 		f = self.request.makefile()
-		
+
 		# read request line
 		reqline = line = f.readline()
 		split = line.rstrip().split(' ')
@@ -427,7 +429,7 @@ class Handler(socketserver.BaseRequestHandler):
 		# Finish and send the request.
 		response += '\r\n\r\n'
 		self.request.sendall(response.encode('utf8', 'ignore'))
-	
+
 	def send_error_page(self, http_version, code, reason):
 		"""Generate an error page."""
 
@@ -448,7 +450,7 @@ class Handler(socketserver.BaseRequestHandler):
 			description = 'WaybackProxy\'s transparent mode requires an HTTP/1.1 compliant client.'
 		else: # another error
 			description = 'Unknown error. The Wayback Machine may be experiencing technical difficulties.'
-		
+
 		# Read error page file.
 		try:
 			f = open('error.html', 'r', encoding='utf8', errors='ignore')
@@ -506,7 +508,7 @@ class Handler(socketserver.BaseRequestHandler):
 			self.send_redirect_page(http_version, new_url)
 			return True
 		return False
-	
+
 	def handle_settings(self, query):
 		"""Generate the settings page."""
 
@@ -525,7 +527,7 @@ class Handler(socketserver.BaseRequestHandler):
 				GEOCITIES_FIX = 'gcFix' in parsed
 				QUICK_IMAGES = 'quickImages' in parsed
 				CONTENT_TYPE_ENCODING = 'ctEncoding' in parsed
-		
+
 		# send the page and stop
 		settingspage  = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'
 		settingspage += '<html><head><title>WaybackProxy Settings</title></head><body><p><b>'
@@ -584,10 +586,24 @@ def main():
 	server = ThreadingTCPServer(('', LISTEN_PORT), Handler)
 	_print('[-] Now listening on port', LISTEN_PORT)
 	_print('[-] Date set to', DATE)
-	try:
-		server.serve_forever()
-	except KeyboardInterrupt: # Ctrl+C to stop
-		pass
+	# try:
+	# 	server.serve_forever()
+	# except KeyboardInterrupt: # Ctrl+C to stop
+	# 	pass
+
+	server_thread = threading.Thread(target=server.serve_forever)
+	server_thread.daemon = True
+	server_thread.start()
+
+	# pidisplayhatmini.displayhatmini.on_button_pressed(pidisplayhatmini.button_callback)
+	# pidisplayhatmini.display_year()
+
+	display = DisplayDateMiniHat()
+	# displayhatmini.on_button_pressed(display.button_callback)
+
+	while True:
+		display.display()
+		time.sleep(1.0 / 30)
 
 if __name__ == '__main__':
 	main()

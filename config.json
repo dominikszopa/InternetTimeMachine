@@ -1,6 +1,6 @@
 {
     "LISTEN_PORT": 8888,
-    "DATE": "20011025",
+    "DATE": "20031025",
     "DATE_TOLERANCE": 365,
     "GEOCITIES_FIX": true,
     "QUICK_IMAGES": true,
