@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import base64, datetime, json, lrudict, re, socket, socketserver, string, sys, threading, time, traceback, urllib.request, urllib.error, urllib.parse
-# import pidisplayhatmini
-from DisplayDateMiniHat import DisplayDateMiniHat
 from config_handler import *
+from DisplayDateMiniHat import DisplayDateMiniHat
 
 class ThreadingTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 	"""TCPServer with ThreadingMixIn added."""
@@ -32,6 +31,8 @@ class Handler(socketserver.BaseRequestHandler):
 
 	def handle(self):
 		"""Handle a request."""
+
+		global DATE
 
 		# readline is pretty convenient
 		f = self.request.makefile()
@@ -137,7 +138,7 @@ class Handler(socketserver.BaseRequestHandler):
 				request_url = '/'.join(split)
 			else:
 				# Get from the Wayback Machine.
-				_print('[>]', archived_url)
+				_print('[>'+DATE+']', archived_url)
 
 				request_url = 'http://web.archive.org/web/{0}if_/{1}'.format(effective_date, archived_url)
 
@@ -252,6 +253,7 @@ class Handler(socketserver.BaseRequestHandler):
 				match = re.search('''//web\\.archive\\.org/web/([0-9]+)''', conn.geturl())
 				if match:
 					requested_date = match.group(1)
+					print(requested_date + ',' + original_date)
 					if self.wayback_to_datetime(requested_date) > self.wayback_to_datetime(original_date) + datetime.timedelta(int(DATE_TOLERANCE)):
 						_print('[!]', requested_date, 'is outside the configured tolerance of', DATE_TOLERANCE, 'days')
 						conn.close()
@@ -583,26 +585,21 @@ def _print(*args, **kwargs):
 
 def main():
 	"""Starts the server."""
+	global DATE
+
 	server = ThreadingTCPServer(('', LISTEN_PORT), Handler)
 	_print('[-] Now listening on port', LISTEN_PORT)
 	_print('[-] Date set to', DATE)
-	# try:
-	# 	server.serve_forever()
-	# except KeyboardInterrupt: # Ctrl+C to stop
-	# 	pass
 
 	server_thread = threading.Thread(target=server.serve_forever)
 	server_thread.daemon = True
 	server_thread.start()
 
-	# pidisplayhatmini.displayhatmini.on_button_pressed(pidisplayhatmini.button_callback)
-	# pidisplayhatmini.display_year()
-
-	display = DisplayDateMiniHat()
-	# displayhatmini.on_button_pressed(display.button_callback)
+	display = DisplayDateMiniHat(DATE)
 
 	while True:
 		display.display()
+		DATE = display.get_date()
 		time.sleep(1.0 / 30)
 
 if __name__ == '__main__':

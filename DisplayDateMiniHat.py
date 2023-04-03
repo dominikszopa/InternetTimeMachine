@@ -12,14 +12,21 @@ sudo apt install python3-pil
 
 
 class DisplayDateMiniHat:
-    def __init__(self):
+    def __init__(self, DATE):
+        """Display Date on Mini HAT Display
+
+        Args:
+        DATE (str) -- Starting date in format YYYYMMDD
+        """
+
         self.width = DisplayHATMini.WIDTH
         self.height = DisplayHATMini.HEIGHT
         self.buffer = Image.new("RGB", (self.width, self.height))
         self.draw = ImageDraw.Draw(self.buffer)
         self.font = ImageFont.truetype("LCD14.otf", 80)
         self.displayhatmini = DisplayHATMini(self.buffer, backlight_pwm=True)
-        self.internet_date = datetime(2005, 1, 1)  # Set starting date
+        self.internet_date = datetime.strptime(DATE, '%Y%m%d').date()
+
         self.brightness = 1.0
         self.displayhatmini.on_button_pressed(self.button_callback)
         self.display_year()
@@ -48,3 +55,6 @@ class DisplayDateMiniHat:
             self.internet_date = self.internet_date + relativedelta(years=1)
 
         self.display_year()
+
+    def get_date(self):
+        return self.internet_date.strftime("%Y%m%d")
