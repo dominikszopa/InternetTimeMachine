@@ -585,7 +585,7 @@ def _print(*args, **kwargs):
 
 def main():
 	"""Starts the server."""
-	global DATE
+	global DATE, shared_state
 
 	server = ThreadingTCPServer(('', LISTEN_PORT), Handler)
 	_print('[-] Now listening on port', LISTEN_PORT)
@@ -599,7 +599,11 @@ def main():
 
 	while True:
 		display.display()
-		DATE = display.get_date()
+		display_date = display.get_date()
+		if DATE != display_date:
+			DATE = display.get_date()
+			shared_state.date_cache.clear()
+			shared_state.availability_cache.clear()
 		time.sleep(1.0 / 30)
 
 if __name__ == '__main__':

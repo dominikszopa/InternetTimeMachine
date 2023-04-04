@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "waybackproxy"
+version = "0.1.0"
+description = "HTTP proxy for tunneling requests through the Internet Archive Wayback Machine on a Raspberry Pi with a display"
+authors = ["Your Name <you@example.com>"]
+license = "GPL-3.0 license"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+datetime = "^5.1"
+python-dateutil = "^2.8.2"
+displayhatmini = "^0.0.2"
+numpy = "^1.24.2"
+spidev = "^3.6"
+pillow = "^9.5.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
