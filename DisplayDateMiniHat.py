@@ -23,7 +23,8 @@ class DisplayDateMiniHat:
         self.height = DisplayHATMini.HEIGHT
         self.buffer = Image.new("RGB", (self.width, self.height))
         self.draw = ImageDraw.Draw(self.buffer)
-        self.font = ImageFont.truetype("LCD14.otf", 80)
+        self.led_font = ImageFont.truetype("LCD14.otf", 65)
+        self.label_font = ImageFont.truetype("impact_label.ttf", 35)
         self.displayhatmini = DisplayHATMini(self.buffer, backlight_pwm=True)
         self.internet_date = datetime.strptime(DATE, '%Y%m%d').date()
 
@@ -36,10 +37,18 @@ class DisplayDateMiniHat:
 
     def display_year(self):
         self.draw.rectangle((0, 0, self.width, self.height), (0, 0, 0))
+
         self.draw.text(
-            (50, 70),
-            self.internet_date.strftime("%Y"),
-            font=self.font,
+            (20, 50),
+            "INTERNET TIME",
+            font=self.label_font,
+            fill=(255, 0, 0)
+        )
+
+        self.draw.text(
+            (20, 140),
+            "-" + self.internet_date.strftime("%Y") + "+",
+            font=self.led_font,
             fill=(255, 0, 0)
         )
 
@@ -48,10 +57,10 @@ class DisplayDateMiniHat:
         if not self.displayhatmini.read_button(pin):
             return
 
-        if pin == self.displayhatmini.BUTTON_A:
+        if pin == self.displayhatmini.BUTTON_B:
             self.internet_date = self.internet_date - relativedelta(years=1)
 
-        if pin == self.displayhatmini.BUTTON_X:
+        if pin == self.displayhatmini.BUTTON_Y:
             self.internet_date = self.internet_date + relativedelta(years=1)
 
         self.display_year()
